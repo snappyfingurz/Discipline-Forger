@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sky Kingdom: Ascension</title>
+    <title>Sky Kingdom: Ascension v4.5</title>
     <!-- Fonts: Cinzel for Titles, Lato for UI -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@400;700&family=Homemade+Apple&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -231,7 +231,6 @@
             font-size: 12px; padding: 5px; outline: none;
             cursor: pointer;
         }
-        /* Custom arrow for select */
         .select-wrapper::after {
             content: '▼';
             font-size: 10px;
@@ -262,7 +261,6 @@
         }
         #biome-label h1 {
             font-size: 64px; margin: 0; line-height: 1;
-            /* Updated to use glow instead of outline for readability */
             text-shadow: 0 0 25px currentColor, 0 0 10px black;
         }
         #biome-desc {
@@ -324,16 +322,19 @@
             display: flex; flex-direction: column; align-items: center; gap: 5px;
         }
         .battle-btn:hover { transform: translateY(-5px); border-color: white; background: rgba(0,0,0,0.8); }
+        .battle-btn[disabled] { opacity: 0.3; cursor: not-allowed; transform: none; border-color: #555; }
         .battle-btn i { font-size: 20px; margin-bottom: 5px; }
 
-        /* Cinematic Curtains */
+        /* CINEMATIC RED CURTAINS */
         .curtain {
-            position: fixed; top: 0; height: 100%; width: 51%; background: #0f172a;
-            z-index: 200; transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+            position: fixed; top: 0; height: 100%; width: 51%; 
+            background: repeating-linear-gradient(90deg, #4a0000 0%, #750000 5%, #9e0000 10%, #750000 15%, #4a0000 20%);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9), 0 0 50px rgba(0,0,0,0.5);
+            z-index: 200; transition: transform 2.0s cubic-bezier(0.77, 0, 0.175, 1);
             transform: scaleX(0);
         }
-        #curtain-left { left: 0; transform-origin: left; }
-        #curtain-right { right: 0; transform-origin: right; }
+        #curtain-left { left: 0; transform-origin: left; border-right: 2px solid #300000; }
+        #curtain-right { right: 0; transform-origin: right; border-left: 2px solid #300000; }
         .curtain.closed { transform: scaleX(1); }
 
         /* Modal */
@@ -361,19 +362,17 @@
 </head>
 <body>
 
-    <!-- Cinematic Curtains -->
     <div id="curtain-left" class="curtain"></div>
     <div id="curtain-right" class="curtain"></div>
 
     <div id="loader">
-        <h2 style="margin-bottom: 10px;">Forging Realms v2.5</h2>
-        <div style="font-size: 12px; opacity: 0.6;">Illuminating the Void...</div>
+        <h2 style="margin-bottom: 10px;">Sky Kingdom v4.5</h2>
+        <div style="font-size: 12px; opacity: 0.6;">Awakening the Golem...</div>
     </div>
 
     <div id="canvas-container"></div>
 
     <div id="ui-layer">
-        <!-- Top Stats -->
         <div class="glass-panel" id="top-bar">
             <div class="stat-badge">
                 <div class="stat-header">
@@ -405,21 +404,17 @@
         </div>
     </div>
 
-    <!-- Toggle Button for Scroll -->
     <div id="toggle-scroll-btn" onclick="toggleScroll()">
         <i class="fas fa-scroll"></i>
     </div>
 
-    <!-- Pirate Scroll (Task Panel) -->
     <div id="scroll-container">
         <div class="scroll-body">
             <div class="scroll-header">
                 <h2 class="fantasy-font" id="scroll-title">Captain's Log</h2>
                 <div class="scroll-date" id="current-date">October 24th, Year of the Sky</div>
             </div>
-            <div id="task-list">
-                <!-- Tasks injected here -->
-            </div>
+            <div id="task-list"></div>
             <div style="margin-top: 15px; border-top: 1px dashed var(--ink-light); padding-top: 15px;">
                 <input type="text" class="scroll-input" id="task-input" placeholder="Draft new orders..." autocomplete="off">
                 <div class="input-group" style="display: flex; gap: 5px; margin-top: 10px;">
@@ -437,33 +432,29 @@
         </div>
     </div>
 
-    <!-- Center Labels -->
     <div id="biome-label">
         <h1 id="biome-name">Title</h1>
         <p id="biome-desc">Description</p>
     </div>
 
-    <!-- Actions -->
     <button id="back-btn" onclick="returnToMap()"><i class="fas fa-chevron-left"></i> [ESC] Return</button>
     <button id="action-btn" class="fantasy-font" onclick="initiateBattle()">Storm Ritual</button>
 
-    <!-- Battle UI -->
     <div id="battle-ui">
-        <div class="battle-msg" id="battle-msg">The Ancient Anomaly Awakens...</div>
+        <div class="battle-msg" id="battle-msg">The Sky Kraken Descends...</div>
         <div class="battle-controls" id="battle-controls">
-            <button class="battle-btn" onclick="performAttack('courage')" style="border-color:var(--courage)">
-                <i class="fas fa-shield-alt" style="color:var(--courage)"></i> Bravery
+            <button class="battle-btn" id="btn-courage" onclick="performAttack('courage')" style="border-color:var(--courage)">
+                <i class="fas fa-shield-alt" style="color:var(--courage)"></i> Bravery <span id="ammo-courage"></span>
             </button>
-            <button class="battle-btn" onclick="performAttack('strength')" style="border-color:var(--strength)">
-                <i class="fas fa-gavel" style="color:var(--strength)"></i> Force
+            <button class="battle-btn" id="btn-strength" onclick="performAttack('strength')" style="border-color:var(--strength)">
+                <i class="fas fa-gavel" style="color:var(--strength)"></i> Force <span id="ammo-strength"></span>
             </button>
-            <button class="battle-btn" onclick="performAttack('intellect')" style="border-color:var(--intellect)">
-                <i class="fas fa-brain" style="color:var(--intellect)"></i> Logic
+            <button class="battle-btn" id="btn-intellect" onclick="performAttack('intellect')" style="border-color:var(--intellect)">
+                <i class="fas fa-brain" style="color:var(--intellect)"></i> Logic <span id="ammo-intellect"></span>
             </button>
         </div>
     </div>
 
-    <!-- Modal -->
     <div id="modal-overlay">
         <div class="modal-card">
             <h2 id="modal-title" class="fantasy-font">Victory</h2>
@@ -489,11 +480,12 @@
         view: 'map',
         isBattling: false,
         mobs: [],
-        banners: [], 
         highlightedBiome: null,
         lavaHeart: null,
         bossParts: [],
-        lastLook: {x:0, y:0, z:0}
+        fireParticles: [],
+        lastLook: {x:0, y:0, z:0},
+        ammo: { courage: 0, strength: 0, intellect: 0 }
     };
 
     const CONFIG = {
@@ -512,36 +504,20 @@
 
     const BIOME_DATA = {
         forest: { 
-            name: "Whispering Woods", 
-            stat: "courage", 
-            color: CONFIG.colors.forest,
-            titleColor: "#4ade80", 
-            desc: "Forge Courage", 
-            font: "'Cinzel', serif" 
+            name: "Whispering Woods", stat: "courage", color: CONFIG.colors.forest,
+            titleColor: "#4ade80", desc: "Forge Courage", font: "'Cinzel', serif" 
         },
         lava: { 
-            name: "Iron Sanctum", 
-            stat: "strength", 
-            color: CONFIG.colors.lava,
-            titleColor: "#f87171",  
-            desc: "Build Strength",
-            font: "'Cinzel', serif"
+            name: "Iron Sanctum", stat: "strength", color: CONFIG.colors.lava,
+            titleColor: "#f87171", desc: "Build Strength", font: "'Cinzel', serif"
         },
         citadel: { 
-            name: "Citadel of Logic", 
-            stat: "intellect", 
-            color: CONFIG.colors.citadel,
-            titleColor: "#60a5fa", 
-            desc: "Sharpen Intellect",
-            font: "'Cinzel', serif"
+            name: "Citadel of Logic", stat: "intellect", color: CONFIG.colors.citadel,
+            titleColor: "#60a5fa", desc: "Sharpen Intellect", font: "'Cinzel', serif"
         },
         campfire: {
-            name: "The Resting Grounds",
-            stat: "campfire",
-            color: 0xffaa00,
-            titleColor: "#ffaa00",
-            desc: "Discipline & Promise",
-            font: "'Cinzel', serif"
+            name: "The Resting Grounds", stat: "campfire", color: 0xffaa00,
+            titleColor: "#ffaa00", desc: "Discipline & Promise", font: "'Cinzel', serif"
         }
     };
 
@@ -550,12 +526,10 @@
        ========================================= */
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
-    
     scene.background = new THREE.Color(CONFIG.colors.skyBottom);
     scene.fog = new THREE.Fog(CONFIG.colors.skyBottom, 30, 150);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // Initial camera position will be handled by switchView('map') logic
     camera.position.set(0, 50, 70); 
     camera.lookAt(0, 0, 0);
 
@@ -579,22 +553,17 @@
     sunLight.shadow.camera.far = 200;
     scene.add(sunLight);
 
-    // Interactive Cursor Light (The "Lantern")
     const cursorLight = new THREE.PointLight(0xffe0b2, 1.5, 20);
     cursorLight.position.set(0, 10, 0);
     scene.add(cursorLight);
 
     /* =========================================
-       ASSET GENERATION (Voxel System)
+       ASSET GENERATION
        ========================================= */
     const boxGeo = new THREE.BoxGeometry(1, 1, 1);
     
     function createVoxel(color, x, y, z, parent, scale={x:1,y:1,z:1}) {
-        const mat = new THREE.MeshStandardMaterial({ 
-            color: color, 
-            roughness: 0.8, 
-            flatShading: true 
-        });
+        const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.8, flatShading: true });
         const mesh = new THREE.Mesh(boxGeo, mat);
         mesh.position.set(x, y, z);
         mesh.scale.set(scale.x, scale.y, scale.z);
@@ -605,13 +574,7 @@
     }
 
     function createEmissiveVoxel(color, x, y, z, parent, scale={x:1,y:1,z:1}, intensity=1) {
-        const mat = new THREE.MeshStandardMaterial({ 
-            color: color, 
-            emissive: color, 
-            emissiveIntensity: intensity, 
-            flatShading: true,
-            roughness: 0.2
-        });
+        const mat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: intensity, flatShading: true, roughness: 0.2 });
         const mesh = new THREE.Mesh(boxGeo, mat);
         mesh.position.set(x, y, z);
         mesh.scale.set(scale.x, scale.y, scale.z);
@@ -630,22 +593,39 @@
         forest: new THREE.Group(),
         lava: new THREE.Group(),
         citadel: new THREE.Group(),
-        campfire: new THREE.Group() // New Biome
+        campfire: new THREE.Group() 
     };
     
-    biomes.forest.position.set(-20, 0, 10);
-    biomes.lava.position.set(20, -2, 10);
-    biomes.citadel.position.set(0, 6, -15);
-    biomes.campfire.position.set(0, -2, 5); // Central position
-
-    biomes.forest.userData = { id: 'forest', baseY: 0 };
-    biomes.lava.userData = { id: 'lava', baseY: -2 };
-    biomes.citadel.userData = { id: 'citadel', baseY: 6 };
-    biomes.campfire.userData = { id: 'campfire', baseY: -2 };
-
+    // Add to worldGroup
     worldGroup.add(biomes.forest, biomes.lava, biomes.citadel, biomes.campfire);
 
-    // --- 1. Whispering Woods (Preserved) ---
+    function initWorld() {
+        // Clear existing
+        biomes.forest.clear();
+        biomes.lava.clear();
+        biomes.citadel.clear();
+        biomes.campfire.clear();
+        state.mobs = [];
+        state.fireParticles = [];
+
+        // Reset positions
+        biomes.forest.position.set(-20, 0, 10); biomes.forest.rotation.set(0,0,0);
+        biomes.lava.position.set(20, -2, 10); biomes.lava.rotation.set(0,0,0);
+        biomes.citadel.position.set(0, 6, -15); biomes.citadel.rotation.set(0,0,0);
+        biomes.campfire.position.set(0, -2, 5); biomes.campfire.rotation.set(0,0,0);
+
+        biomes.forest.userData = { id: 'forest', baseY: 0 };
+        biomes.lava.userData = { id: 'lava', baseY: -2 };
+        biomes.citadel.userData = { id: 'citadel', baseY: 6 };
+        biomes.campfire.userData = { id: 'campfire', baseY: -2 };
+
+        buildForest();
+        buildLava();
+        buildCitadel();
+        buildCampfire();
+    }
+
+    // --- 1. WHISPERING WOODS ---
     function buildForest() {
         const g = biomes.forest;
         for(let x=-7; x<7; x++) for(let z=-7; z<7; z++) {
@@ -655,7 +635,6 @@
             createVoxel(0x5d4037, x, -1, z, g); 
             if(Math.random()>0.85) createVoxel(0x4e342e, x, -2-Math.random(), z, g, {x:0.5,y:2,z:0.5});
         }
-        
         for(let i=0; i<15; i++) {
             const tx=(Math.random()*10-5), tz=(Math.random()*10-5);
             createVoxel(0x3e2723, tx, 1.5, tz, g, {x:0.6, y:3, z:0.6}); 
@@ -663,7 +642,6 @@
             if(Math.random()>0.7) createEmissiveVoxel(0xffff00, tx+0.5, 4, tz, g, {x:0.2,y:0.2,z:0.2}, 2);
             if(Math.random() > 0.5) createVoxel(0x22c55e, tx + 1, 0.5, tz + 1, g, {x:0.8, y:0.8, z:0.8});
         }
-
         const pGeo = new THREE.BufferGeometry();
         const pPos = [];
         for(let i=0; i<40; i++) pPos.push((Math.random()-0.5)*12, Math.random()*6+2, (Math.random()-0.5)*12);
@@ -672,7 +650,6 @@
         g.add(fireflies);
         g.userData.particles = fireflies;
 
-        // Mobs: Rabbits
         for(let i=0; i<6; i++) {
             const rabbit = new THREE.Group();
             createVoxel(0xffffff, 0, 0.25, 0, rabbit, {x:0.4, y:0.4, z:0.6}); 
@@ -680,10 +657,8 @@
             createVoxel(0xffc0cb, -0.1, 0.8, 0.2, rabbit, {x:0.1, y:0.5, z:0.1});
             createVoxel(0xffc0cb, 0.1, 0.8, 0.2, rabbit, {x:0.1, y:0.5, z:0.1});
             createVoxel(0xffffff, 0, 0.3, -0.35, rabbit, {x:0.15, y:0.15, z:0.15});
-            createVoxel(0x000000, 0.1, 0.6, 0.36, rabbit, {x:0.05, y:0.05, z:0.02}); // Eye
-            createVoxel(0x000000, -0.1, 0.6, 0.36, rabbit, {x:0.05, y:0.05, z:0.02}); // Eye
-            createVoxel(0xffa07a, 0, 0.45, 0.36, rabbit, {x:0.05, y:0.05, z:0.02}); // Mouth/Nose
-            
+            createVoxel(0x000000, 0.1, 0.6, 0.36, rabbit, {x:0.05, y:0.05, z:0.02}); 
+            createVoxel(0x000000, -0.1, 0.6, 0.36, rabbit, {x:0.05, y:0.05, z:0.02});
             rabbit.position.set((Math.random()-0.5)*8, 1, (Math.random()-0.5)*8);
             rabbit.userData = { type: 'rabbit', baseY: 1, state: 'idle', timer: Math.random() * 2, jumpTarget: new THREE.Vector3() };
             g.add(rabbit);
@@ -691,7 +666,7 @@
         }
     }
 
-    // --- 2. IRON SANCTUM (Preserved) ---
+    // --- 2. IRON SANCTUM ---
     function buildLava() {
         const g = biomes.lava;
         for(let x=-8; x<8; x++) for(let z=-8; z<8; z++) {
@@ -720,72 +695,106 @@
         heartGroup.add(pLight);
         state.lavaHeart = { group: heartGroup, core: core, light: pLight };
 
-        // Mobs: Slimes
-        for(let i=0; i<4; i++) {
+        for(let i=0; i<5; i++) {
             const slime = new THREE.Group();
-            createVoxel(0x333333, 0, 0.4, 0, slime, {x:0.8, y:0.8, z:0.8});
-            createEmissiveVoxel(0xff4500, 0, 0.4, 0.41, slime, {x:0.4, y:0.4, z:0.1}, 2); 
+            createEmissiveVoxel(0xff0000, 0, 0.4, 0, slime, {x:0.5, y:0.5, z:0.5}, 2); // Core
+            const shellGeo = new THREE.BoxGeometry(1, 1, 1);
+            const shellMat = new THREE.MeshStandardMaterial({color: 0xff4500, transparent: true, opacity: 0.7, roughness: 0.1, emissive: 0xff4500, emissiveIntensity: 0.2});
+            const shellMesh = new THREE.Mesh(shellGeo, shellMat);
+            shellMesh.position.set(0, 0.4, 0);
+            shellMesh.scale.set(0.8, 0.7, 0.8);
+            slime.add(shellMesh);
+            createVoxel(0xffffff, 0.15, 0.5, 0.4, slime, {x:0.1, y:0.1, z:0.1});
+            createVoxel(0xffffff, -0.15, 0.5, 0.4, slime, {x:0.1, y:0.1, z:0.1});
+            createVoxel(0x000000, 0.15, 0.5, 0.45, slime, {x:0.05, y:0.05, z:0.05});
+            createVoxel(0x000000, -0.15, 0.5, 0.45, slime, {x:0.05, y:0.05, z:0.05});
             slime.position.set((Math.random()-0.5)*8, 1, (Math.random()-0.5)*8);
-            slime.userData = { type: 'slime', baseY: 1, timer: Math.random()*2, dir: new THREE.Vector3((Math.random()-0.5)*0.02, 0, (Math.random()-0.5)*0.02) };
+            slime.userData = { type: 'slime', baseY: 1, state: 'idle', timer: Math.random()*2, jumpTarget: new THREE.Vector3() };
             g.add(slime);
             state.mobs.push(slime);
         }
+
+        const hulk = new THREE.Group();
+        createVoxel(0x2a2a2a, 0, 1.2, 0, hulk, {x:1.4, y:1.2, z:1.0}); // Main
+        createVoxel(0x444444, 0, 1.6, -0.2, hulk, {x:1.2, y:0.5, z:0.8}); // Upper Back
+        createEmissiveVoxel(0xff4500, 0, 1.2, 0.51, hulk, {x:0.8, y:0.8, z:0.1}, 2); // Chest glow
+        createEmissiveVoxel(0xff0000, 0.4, 1.0, 0.51, hulk, {x:0.2, y:0.6, z:0.1}, 2);
+        createEmissiveVoxel(0xff0000, -0.4, 1.0, 0.51, hulk, {x:0.2, y:0.6, z:0.1}, 2);
+        createVoxel(0x111111, 0, 1.9, 0, hulk, {x:0.8, y:0.6, z:0.8});
+        createEmissiveVoxel(0xffaa00, 0.2, 2.0, 0.4, hulk, {x:0.15, y:0.1, z:0.1}, 5); 
+        createEmissiveVoxel(0xffaa00, -0.2, 2.0, 0.4, hulk, {x:0.15, y:0.1, z:0.1}, 5); 
+        createEmissiveVoxel(0xff3300, 0, 1.7, 0.41, hulk, {x:0.4, y:0.1, z:0.1}, 3); 
+        const legL = new THREE.Group(); legL.position.set(-0.4, 0.6, 0);
+        createVoxel(0x333333, 0, -0.3, 0, legL, {x:0.5, y:0.6, z:0.6}); 
+        createVoxel(0x1a1a1a, 0, -0.9, 0.1, legL, {x:0.45, y:0.6, z:0.5}); 
+        createEmissiveVoxel(0xff4500, 0, -0.6, 0.31, legL, {x:0.1, y:0.4, z:0.1}, 2); 
+        hulk.add(legL);
+        const legR = new THREE.Group(); legR.position.set(0.4, 0.6, 0);
+        createVoxel(0x333333, 0, -0.3, 0, legR, {x:0.5, y:0.6, z:0.6}); 
+        createVoxel(0x1a1a1a, 0, -0.9, 0.1, legR, {x:0.45, y:0.6, z:0.5}); 
+        hulk.add(legR);
+        const armL = new THREE.Group(); armL.position.set(-0.9, 1.6, 0);
+        createVoxel(0x333333, 0, 0, 0, armL, {x:0.6, y:0.6, z:0.6}); 
+        createVoxel(0x2a2a2a, 0, -0.6, 0, armL, {x:0.4, y:0.7, z:0.4}); 
+        createVoxel(0x1a1a1a, 0, -1.3, 0.2, armL, {x:0.5, y:0.7, z:0.5}); 
+        createEmissiveVoxel(0xff0000, 0, -1.0, 0.2, armL, {x:0.1, y:0.1, z:0.45}, 2); 
+        hulk.add(armL);
+        const armR = new THREE.Group(); armR.position.set(0.9, 1.6, 0);
+        createVoxel(0x333333, 0, 0, 0, armR, {x:0.6, y:0.6, z:0.6}); 
+        createVoxel(0x2a2a2a, 0, -0.6, 0, armR, {x:0.4, y:0.7, z:0.4}); 
+        createVoxel(0x1a1a1a, 0, -1.3, 0.2, armR, {x:0.5, y:0.7, z:0.5}); 
+        hulk.add(armR);
+        const chainGroup = new THREE.Group();
+        chainGroup.position.set(0.6, 0.2, 0.5);
+        for(let k=0; k<6; k++) {
+            const link = createEmissiveVoxel(0xff5722, 0, 0, k*0.3, chainGroup, {x:0.25, y:0.08, z:0.4}, 2);
+            link.rotation.y = Math.random();
+        }
+        hulk.add(chainGroup);
+        hulk.userData.chain = chainGroup;
+        hulk.position.set(4, 0.1, 4); 
+        hulk.userData = { type: 'hulk', baseY: 0.1, timer: 0, dir: new THREE.Vector3(0.02, 0, 0.02) };
+        g.add(hulk);
+        state.mobs.push(hulk);
     }
 
-    // --- 3. CITADEL OF LOGIC (Preserved) ---
+    // --- 3. CITADEL ---
     function buildCitadel() {
         const g = biomes.citadel;
-        g.children = []; // Clear old
-
-        // 1. Base Platform (Clean Marble)
+        g.children = []; 
         for(let x=-6; x<6; x++) for(let z=-6; z<6; z++) {
             const dist = Math.sqrt(x*x + z*z);
             if(dist > 5.5) continue;
             createVoxel(0xf8fafc, x, 0, z, g, {x:1, y:1, z:1});
-            createVoxel(0x94a3b8, x, -1, z, g, {x:0.9, y:1, z:0.9}); // darker underside
+            createVoxel(0x94a3b8, x, -1, z, g, {x:0.9, y:1, z:0.9}); 
+            if(Math.abs(x) < 2 && z > 0) createVoxel(0xcbd5e1, x, 0.51, z, g, {x:0.9, y:0.05, z:0.9}); 
         }
-
-        // 2. Main Castle Structure (Sharp & Vertical)
         const castle = new THREE.Group();
         castle.position.set(0, 0.5, 0);
         g.add(castle);
-
-        // Central Spire Base
         createVoxel(0xe2e8f0, 0, 4, 0, castle, {x:3, y:8, z:3});
-        
-        // Needle Spires (Using ConeGeometry for sharpness)
         function createSpire(x, z, height, width, color) {
             const geo = new THREE.ConeGeometry(width, height, 4);
             const mat = new THREE.MeshStandardMaterial({color: color, flatShading: true, roughness: 0.2});
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, height/2 + 8, z);
             castle.add(mesh);
-            
-            // Glowing Tip
             const tipGeo = new THREE.ConeGeometry(width/4, 1, 4);
             const tipMat = new THREE.MeshBasicMaterial({color: 0x60a5fa});
             const tip = new THREE.Mesh(tipGeo, tipMat);
             tip.position.set(0, height/2 + 0.5, 0);
             mesh.add(tip);
         }
-
-        // Main Spire
-        createSpire(0, 0, 12, 2.5, 0x1e3a8a); // Deep Blue
-        // Side Spires
+        createSpire(0, 0, 12, 2.5, 0x1e3a8a); 
         createSpire(-2.5, -2.5, 8, 1, 0x2563eb);
         createSpire(2.5, -2.5, 8, 1, 0x2563eb);
         createSpire(-2.5, 2.5, 8, 1, 0x2563eb);
         createSpire(2.5, 2.5, 8, 1, 0x2563eb);
-
-        // 3. Heavenly Gates (Always Open)
         const gate = new THREE.Group();
         gate.position.set(0, 1, 4.5);
-        // Pillars
         createVoxel(0xffffff, -1.5, 2, 0, gate, {x:0.5, y:4, z:0.5});
         createVoxel(0xffffff, 1.5, 2, 0, gate, {x:0.5, y:4, z:0.5});
-        // Arch
         createVoxel(0xffffff, 0, 4.2, 0, gate, {x:3.5, y:0.5, z:0.5});
-        // Glowing Energy
         const lightPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(3, 4),
             new THREE.MeshBasicMaterial({color: 0x60a5fa, side: THREE.DoubleSide, transparent: true, opacity: 0.3})
@@ -793,132 +802,133 @@
         lightPlane.position.y = 2;
         gate.add(lightPlane);
         castle.add(gate);
-
-        // 4. Floating Outer Walls
         const wallRing = new THREE.Group();
         for(let i=0; i<12; i++) {
             const angle = (i/12) * Math.PI * 2;
             const segment = createVoxel(0xcbd5e1, Math.cos(angle)*7, 0, Math.sin(angle)*7, wallRing, {x:1.5, y:2, z:0.5});
             segment.rotation.y = -angle;
-            // Float animation handled in update
         }
         g.add(wallRing);
         g.userData.wallRing = wallRing;
-
-        // Mobs: Scholars
-        for(let i=0; i<3; i++) {
+        for(let i=0; i<4; i++) {
             const wiz = new THREE.Group();
-            createVoxel(0x1e3a8a, 0, 0.75, 0, wiz, {x:0.5, y:1.5, z:0.5}); // Robe
-            createVoxel(0xffd700, 0, 1.6, 0, wiz, {x:0.3, y:0.3, z:0.3}); // Head
-            createSpire(0, 0, 0.8, 0.2, 0x60a5fa); // Hat (reusing logic conceptually, implementing manually)
-            const hat = createVoxel(0x60a5fa, 0, 1.9, 0, wiz, {x:0.2, y:0.4, z:0.2});
-            wiz.position.set((Math.random()-0.5)*4, 1, (Math.random()-0.5)*4);
+            createVoxel(0x2563eb, 0, 0.7, 0, wiz, {x:0.5, y:1.4, z:0.4}); 
+            createVoxel(0x1e3a8a, 0, 0.6, -0.25, wiz, {x:0.7, y:1.2, z:0.2}); 
+            createVoxel(0xffd700, 0, 1.6, 0, wiz, {x:0.35, y:0.4, z:0.35}); 
+            createVoxel(0xe2e8f0, 0, 1.45, 0.2, wiz, {x:0.25, y:0.2, z:0.1}); 
+            const hatGeo = new THREE.ConeGeometry(0.35, 0.8, 8);
+            const hatMat = new THREE.MeshStandardMaterial({color: 0x1e3a8a, flatShading:true});
+            const hat = new THREE.Mesh(hatGeo, hatMat);
+            hat.position.set(0, 2.1, 0);
+            wiz.add(hat);
+            createVoxel(0x1e3a8a, 0, 1.8, 0, wiz, {x:0.8, y:0.05, z:0.8}); 
+            createVoxel(0x2563eb, 0.35, 1.0, 0.1, wiz, {x:0.2, y:0.6, z:0.2}).rotation.x = -Math.PI/4; 
+            const book = new THREE.Group();
+            createVoxel(0x78350f, 0, 0, 0, book, {x:0.3, y:0.4, z:0.05}); 
+            createVoxel(0xffffff, 0, 0, 0.04, book, {x:0.25, y:0.35, z:0.02}); 
+            book.position.set(0.4, 1.1, 0.4);
+            book.rotation.set(-0.5, -0.3, 0);
+            wiz.add(book);
+            wiz.userData.book = book;
+            wiz.position.set((Math.random()-0.5)*2, 1, 2 + Math.random()*2);
+            const angle = Math.random() * Math.PI * 2;
+            wiz.userData = { type: 'wizard', baseY: 1, hoverOffset: Math.random() * 10, dir: new THREE.Vector3(Math.cos(angle)*0.015, 0, Math.sin(angle)*0.015), timer: Math.random() * 3 };
             g.add(wiz);
-            state.mobs.push({userData: {type: 'static', obj: wiz}});
+            state.mobs.push(wiz);
         }
     }
 
-    // --- 4. BIOME: CAMPFIRE / RESTING GROUNDS (Preserved) ---
+    // --- 4. CAMPFIRE ---
     function buildCampfire() {
         const g = biomes.campfire;
-        
-        // Base Island (Rounded, Grassy, Earthy)
         for(let x=-5; x<5; x++) for(let z=-5; z<5; z++) {
             if(x*x + z*z > 20) continue;
-            createVoxel(0x5c8001, x, 0, z, g); // Dark warm grass
-            createVoxel(0x3e2723, x, -1, z, g); // Dirt
+            createVoxel(0x5c8001, x, 0, z, g); 
+            createVoxel(0x3e2723, x, -1, z, g); 
         }
-
-        // Central Campfire
-        const fireGroup = new THREE.Group();
-        // Logs
-        createVoxel(0x5d4037, 0.8, 0.2, 0, fireGroup, {x:1.5, y:0.3, z:0.3}).rotation.y = Math.random();
-        createVoxel(0x5d4037, -0.8, 0.2, 0.2, fireGroup, {x:1.5, y:0.3, z:0.3}).rotation.y = Math.random();
-        createVoxel(0x5d4037, 0, 0.2, 0.8, fireGroup, {x:1.5, y:0.3, z:0.3}).rotation.y = Math.PI/2 + Math.random();
-        
-        // Fire Particles (Simple Geometry cluster)
-        for(let i=0; i<5; i++) {
-            createEmissiveVoxel(0xffaa00, (Math.random()-0.5)*0.5, 0.5+Math.random()*0.5, (Math.random()-0.5)*0.5, fireGroup, {x:0.2, y:0.2, z:0.2}, 2);
+        const fireCenter = new THREE.Group();
+        for(let i=0; i<8; i++) {
+            const angle = (i/8)*Math.PI*2;
+            createVoxel(0x888888, Math.cos(angle)*0.8, 0.2, Math.sin(angle)*0.8, fireCenter, {x:0.4, y:0.3, z:0.4}).rotation.y = Math.random();
         }
-        
-        // Light
-        const fireLight = new THREE.PointLight(0xffaa00, 2, 10);
-        fireLight.position.y = 1;
-        fireGroup.add(fireLight);
-        g.add(fireGroup);
+        const logColor = 0x5d4037; 
+        let l = createVoxel(logColor, 0, 0.3, 0.3, fireCenter, {x:1.6, y:0.3, z:0.4}); l.rotation.x = 0.2; 
+        l = createVoxel(logColor, 0.3, 0.3, -0.3, fireCenter, {x:1.6, y:0.3, z:0.4}); l.rotation.y = 2.0; l.rotation.x = 0.2;
+        l = createVoxel(logColor, -0.3, 0.5, -0.2, fireCenter, {x:1.6, y:0.3, z:0.4}); l.rotation.y = -2.0; l.rotation.x = -0.2;
+        const fireLight = new THREE.PointLight(0xffaa00, 2, 12);
+        fireLight.position.set(0, 1.5, 0);
+        fireCenter.add(fireLight);
         g.userData.fireLight = fireLight;
-
-        // Tents & Bedrolls
+        g.add(fireCenter);
+        state.fireParticles = [];
+        for(let i=0; i<40; i++) {
+            const p = createEmissiveVoxel(0xffaa00, 0, 0, 0, fireCenter, {x:0.2, y:0.2, z:0.2}, 1);
+            resetParticle(p);
+            state.fireParticles.push(p);
+        }
         const tentPos = [{x:-3, z:2}, {x:3, z:-1}, {x:-1, z:-3}];
         tentPos.forEach(p => {
             const tent = new THREE.Group();
             tent.position.set(p.x, 0.5, p.z);
-            tent.rotation.y = Math.atan2(-p.x, -p.z); // Face center
-            // Canvas
+            tent.rotation.y = Math.atan2(-p.x, -p.z);
             const t1 = createVoxel(0xd4a373, 0, 0.5, 0, tent, {x:1.5, y:1, z:1.5});
             t1.rotation.x = Math.PI/4;
-            // Bedroll
             createVoxel(0x8d6e63, 0, 0.1, 0.5, tent, {x:0.8, y:0.2, z:1.2});
             g.add(tent);
         });
-
-        // Resting Adventurers
         for(let i=0; i<3; i++) {
             const adv = new THREE.Group();
-            createVoxel(0x8d6e63, 0, 0.4, 0, adv, {x:0.5, y:0.6, z:0.5}); // Body sitting
-            createVoxel(0xffcc80, 0, 0.9, 0, adv, {x:0.3, y:0.3, z:0.3}); // Head
+            createVoxel(0x8d6e63, 0, 0.4, 0, adv, {x:0.5, y:0.6, z:0.5}); 
+            createVoxel(0xffcc80, 0, 0.9, 0, adv, {x:0.3, y:0.3, z:0.3}); 
             adv.position.set((Math.random()-0.5)*3, 0.3, (Math.random()-0.5)*3);
             adv.lookAt(0,0,0);
             g.add(adv);
         }
-
-        // Fireflies
-        const pGeo = new THREE.BufferGeometry();
-        const pPos = [];
-        for(let i=0; i<20; i++) pPos.push((Math.random()-0.5)*6, Math.random()*3, (Math.random()-0.5)*6);
-        pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPos, 3));
-        const flies = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0xffaa00, size:0.1, transparent:true}));
-        g.add(flies);
-        g.userData.particles = flies;
     }
 
-    // --- 5. BRIDGES (Connecting to Center) ---
+    function resetParticle(p) {
+        p.position.set((Math.random()-0.5)*0.6, 0.5, (Math.random()-0.5)*0.6);
+        p.scale.set(0.3, 0.3, 0.3);
+        p.material.color.setHex(0xffff00); 
+        p.material.emissive.setHex(0xffff00);
+        p.userData = {
+            life: 1.0, 
+            speedY: 0.02 + Math.random()*0.03,
+            drift: (Math.random()-0.5)*0.01
+        };
+        p.visible = true;
+    }
+
+    // --- 5. BRIDGES ---
     function buildBridges() {
         const bridgeGroup = new THREE.Group();
         scene.add(bridgeGroup);
-        
         function makeBridge(start, end) {
             const dist = start.distanceTo(end);
             const steps = Math.floor(dist * 1.5);
             for(let i=0; i<=steps; i++) {
                 const t = i/steps;
                 const p = new THREE.Vector3().lerpVectors(start, end, t);
-                // Arch effect
                 p.y += Math.sin(t * Math.PI) * 1.0; 
                 createVoxel(0x8d6e63, p.x, p.y, p.z, bridgeGroup, {x:1, y:0.2, z:1});
-                
-                // Lanterns
                 if(i%8===0 && i!==0 && i!==steps) {
                     createEmissiveVoxel(0xffaa00, p.x, p.y+1, p.z, bridgeGroup, {x:0.2,y:0.4,z:0.2}, 1);
                 }
             }
         }
-
-        // Connect Center (Campfire) to all 3 nodes
         makeBridge(biomes.campfire.position, biomes.forest.position);
         makeBridge(biomes.campfire.position, biomes.lava.position);
         makeBridge(biomes.campfire.position, biomes.citadel.position);
     }
 
-    buildForest(); buildLava(); buildCitadel(); buildCampfire(); buildBridges();
+    initWorld();
+    buildBridges();
 
-    // 6. Cloud System & Stars (Enhanced for Immersion)
+    // 6. Environment
     const cloudParticles = [];
     function createClouds() {
         const cloudGeo = new THREE.IcosahedronGeometry(1, 0);
         const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, flatShading: true });
-        
-        // Massive distant cloud floor
         const ocean = new THREE.InstancedMesh(cloudGeo, cloudMat, 300);
         const dummy = new THREE.Object3D();
         for(let i=0; i<300; i++) {
@@ -929,8 +939,6 @@
             ocean.setMatrixAt(i, dummy.matrix);
         }
         scene.add(ocean);
-
-        // Drifting clouds
         for(let i=0; i<30; i++) {
             const c = new THREE.Mesh(cloudGeo, cloudMat);
             c.position.set((Math.random()-0.5)*100, Math.random()*15 - 5, (Math.random()-0.5)*80);
@@ -939,8 +947,6 @@
             scene.add(c);
             cloudParticles.push(c);
         }
-
-        // Starfield / Distant Dust
         const starGeo = new THREE.BufferGeometry();
         const starPos = [];
         for(let i=0; i<1000; i++) {
@@ -950,51 +956,47 @@
         const starMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.5, transparent: true, opacity: 0.6});
         const stars = new THREE.Points(starGeo, starMat);
         scene.add(stars);
-        
-        // Slight star rotation handle
         scene.userData.stars = stars;
     }
     createClouds();
 
     /* =========================================
-       BOSS & BATTLE ASSETS
+       BOSS: THE SKY KRAKEN
        ========================================= */
     const bossGroup = new THREE.Group();
     scene.add(bossGroup);
     bossGroup.visible = false;
 
     function buildBoss() {
-        // Core: Pulsing unstable energy
-        const core = createEmissiveVoxel(0xff0000, 0, 0, 0, bossGroup, {x:2, y:2, z:2}, 5);
-        state.bossParts.push({mesh: core, type: 'core', rot: {x:0.01, y:0.02}});
-
-        // Inner Ring: Jagged Rock Plates
-        const ring1 = new THREE.Group();
-        for(let i=0; i<8; i++) {
-            const angle = (i/8)*Math.PI*2;
-            createVoxel(0x1a1a1a, Math.cos(angle)*3, (Math.random()-0.5)*2, Math.sin(angle)*3, ring1, {x:1, y:2, z:1});
+        const cloudGroup = new THREE.Group();
+        for(let i=0; i<20; i++) {
+            const p = createVoxel(0x8899aa, (Math.random()-0.5)*8, (Math.random()-0.5)*2, (Math.random()-0.5)*8, cloudGroup, 
+                {x:2+Math.random()*2, y:1+Math.random(), z:2+Math.random()*2});
+            p.material.transparent = true;
+            p.material.opacity = 0.6;
         }
-        bossGroup.add(ring1);
-        state.bossParts.push({mesh: ring1, type: 'ring', rot: {x:0.02, y:0.01, z:0.01}});
-
-        // Outer Ring: Floating Debris & Smoke
-        const ring2 = new THREE.Group();
-        for(let i=0; i<12; i++) {
-            const angle = (i/12)*Math.PI*2;
-            const dist = 5 + Math.random();
-            const debris = createVoxel(0x333333, Math.cos(angle)*dist, (Math.random()-0.5)*4, Math.sin(angle)*dist, ring2, {x:0.5, y:0.5, z:0.5});
-            debris.rotation.set(Math.random(), Math.random(), Math.random());
-        }
-        bossGroup.add(ring2);
-        state.bossParts.push({mesh: ring2, type: 'ring', rot: {x:-0.01, y:-0.03, z:0.0}});
-
-        // Tentacles / Energy Arcs
-        for(let i=0; i<3; i++) {
-            const arm = new THREE.Group();
-            createEmissiveVoxel(0xff3d00, 2, 0, 0, arm, {x:4, y:0.2, z:0.2}, 2);
-            arm.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
-            bossGroup.add(arm);
-            state.bossParts.push({mesh: arm, type: 'arm', rot: {x:0.05, y:0.05}});
+        bossGroup.add(cloudGroup);
+        state.bossParts.push({mesh: cloudGroup, type: 'cloud', rot: {x:0, y:0.005}});
+        const head = new THREE.Group();
+        head.position.y = 4;
+        createVoxel(0x4b0082, 0, 2, 0, head, {x:4, y:5, z:4}); 
+        createVoxel(0x4b0082, 0, 5, 0, head, {x:3, y:2, z:3}); 
+        createEmissiveVoxel(0x00ffcc, 1.2, 1, 1.8, head, {x:0.8, y:0.8, z:0.5}, 5);
+        createEmissiveVoxel(0x00ffcc, -1.2, 1, 1.8, head, {x:0.8, y:0.8, z:0.5}, 5);
+        bossGroup.add(head);
+        state.bossParts.push({mesh: head, type: 'head', rot: {x:0, y:0}});
+        const tentacleCount = 8;
+        for(let i=0; i<tentacleCount; i++) {
+            const angle = (i/tentacleCount) * Math.PI * 2;
+            const tGroup = new THREE.Group();
+            tGroup.position.set(Math.cos(angle)*2, 4, Math.sin(angle)*2);
+            tGroup.rotation.y = -angle;
+            for(let j=0; j<6; j++) {
+                const seg = createVoxel(0x5e2a84, 0, -j*1.2, 0, tGroup, {x:0.8 - j*0.1, y:1, z:0.8 - j*0.1});
+                if(j<5) createEmissiveVoxel(0xff00ff, 0, -j*1.2, 0.4, tGroup, {x:0.2, y:0.2, z:0.1}, 0.5);
+            }
+            bossGroup.add(tGroup);
+            state.bossParts.push({mesh: tGroup, type: 'tentacle', index: i});
         }
     }
     buildBoss();
@@ -1006,69 +1008,66 @@
     }, 1500);
 
     /* =========================================
-       ANIMATION LOOP & CONTROL
+       ANIMATION LOOP
        ========================================= */
     const clock = new THREE.Clock();
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    const cursor3D = new THREE.Vector3();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -5); // Plane for raycasting cursor height
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -5); 
 
     function animate() {
         requestAnimationFrame(animate);
         const delta = clock.getDelta();
         const time = clock.getElapsedTime();
 
-        // 1. World Drift (Immersion)
-        // Very slow, majestic rotation of the entire world
         if(!state.isBattling) {
             worldGroup.rotation.y = Math.sin(time * 0.05) * 0.05;
         }
 
-        // 2. Parallax Camera (Control/Juice)
         if(state.view === 'map') {
-            const targetX = mouse.x * 5; // Slight left/right parallax
-            const targetY = 50 + (mouse.y * 5); // Slight up/down parallax
-            
-            // Smoothly interpolate current pos to target
+            const targetX = mouse.x * 5; 
+            const targetY = 50 + (mouse.y * 5); 
             camera.position.x += (targetX - camera.position.x) * 0.05;
             camera.position.y += (targetY - camera.position.y) * 0.05;
             camera.lookAt(0, 0, 0);
         }
 
-        // 3. Cursor Light (Immersion/Feedback)
-        // Move the 3D cursor light to where the mouse is pointing on a theoretical plane
         raycaster.setFromCamera(mouse, camera);
         const target = new THREE.Vector3();
         raycaster.ray.intersectPlane(plane, target);
         if(target) {
             cursorLight.position.x += (target.x - cursorLight.position.x) * 0.1;
             cursorLight.position.z += (target.z - cursorLight.position.z) * 0.1;
-            // Float light above the world
             cursorLight.position.y = 15 + Math.sin(time) * 2; 
         }
 
-        // Star Movement
-        if(scene.userData.stars) {
-            scene.userData.stars.rotation.y = time * 0.005;
-        }
+        if(scene.userData.stars) scene.userData.stars.rotation.y = time * 0.005;
 
-        // Biome Floats
         biomes.citadel.position.y = 6 + Math.sin(time*0.5)*0.5;
         biomes.campfire.position.y = -2 + Math.sin(time*0.3)*0.3;
-        
-        // Citadel Wall Ring Spin
         if(biomes.citadel.userData.wallRing) {
             biomes.citadel.userData.wallRing.rotation.y = time * 0.1;
             biomes.citadel.userData.wallRing.position.y = Math.sin(time) * 0.5;
         }
 
-        // Campfire Flicker
         if(biomes.campfire.userData.fireLight) {
-            biomes.campfire.userData.fireLight.intensity = 2 + Math.sin(time*20)*0.5 + Math.random()*0.5;
+            const noise = Math.sin(time * 20) + Math.sin(time * 50) * 0.5;
+            biomes.campfire.userData.fireLight.intensity = 2 + noise * 0.5;
+            state.fireParticles.forEach(p => {
+                p.userData.life -= 0.02;
+                if(p.userData.life <= 0) resetParticle(p);
+                p.position.y += p.userData.speedY;
+                p.position.x += p.userData.drift + Math.sin(time * 5 + p.position.y)*0.005;
+                p.position.z += p.userData.drift + Math.cos(time * 3 + p.position.y)*0.005;
+                const life = p.userData.life;
+                p.scale.setScalar(life * 0.3); 
+                if(life > 0.7) p.material.color.setHex(0xffff00); 
+                else if (life > 0.4) p.material.color.setHex(0xffaa00); 
+                else if (life > 0.2) p.material.color.setHex(0xff0000); 
+                else { p.material.color.setHex(0x555555); p.material.emissiveIntensity = 0; }
+            });
         }
 
-        // Lava Heart Pulse
         if(state.lavaHeart) {
             const pulse = 1 + Math.sin(time * 10) * 0.1; 
             state.lavaHeart.core.scale.set(pulse, pulse, pulse);
@@ -1076,40 +1075,46 @@
             state.lavaHeart.group.rotation.y = time * 0.5;
         }
 
-        // Clouds Move
         cloudParticles.forEach(c => {
             c.position.x += c.userData.speed;
             if(c.position.x > 80) c.position.x = -80;
         });
 
-        // Particles
-        const particles = [biomes.forest.userData.particles, biomes.campfire.userData.particles].flat();
+        const particles = [biomes.forest.userData.particles].flat();
         particles.forEach(p => {
             if(!p) return;
             const pos = p.geometry.attributes.position.array;
             for(let i=1; i<pos.length; i+=3) {
-                pos[i] += Math.sin(time + pos[i-1])*0.02; // Float up/down
+                pos[i] += Math.sin(time + pos[i-1])*0.02; 
             }
             p.geometry.attributes.position.needsUpdate = true;
         });
 
-        // Boss Animation (Chaotic)
         if(state.isBattling) {
-            bossGroup.position.y = Math.sin(time)*2;
+            bossGroup.position.y = 10 + Math.sin(time * 0.5) * 2;
             state.bossParts.forEach(p => {
-                p.mesh.rotation.x += p.rot.x;
-                p.mesh.rotation.y += p.rot.y;
-                if(p.rot.z) p.mesh.rotation.z += p.rot.z;
-                if(p.type === 'core') {
-                    const s = 1 + Math.sin(time*15)*0.2;
-                    p.mesh.scale.set(s,s,s);
+                if(p.type === 'cloud') {
+                    p.mesh.rotation.y += p.rot.y;
+                    p.mesh.children.forEach((c, idx) => {
+                         c.position.y += Math.sin(time * 2 + idx) * 0.01;
+                    });
+                }
+                if(p.type === 'head') {
+                    p.mesh.rotation.y = Math.sin(time * 0.5) * 0.1;
+                }
+                if(p.type === 'tentacle') {
+                    p.mesh.rotation.z = Math.sin(time * 2 + p.index) * 0.1;
+                    p.mesh.children.forEach((seg, idx) => {
+                        seg.position.x = Math.sin(time * 3 + p.index + idx) * 0.1;
+                    });
                 }
             });
         }
 
-        // Mob Animation
         state.mobs.forEach(mob => {
-            if(mob.userData.type === 'rabbit') {
+            const type = mob.userData.type;
+            
+            if(type === 'rabbit') {
                 mob.userData.timer -= delta;
                 if(mob.userData.timer <= 0) {
                     if(mob.userData.state === 'idle') {
@@ -1126,23 +1131,94 @@
                 if(mob.userData.state === 'jump') {
                     const progress = 1 - (mob.userData.timer / 0.5);
                     mob.position.y = mob.userData.baseY + Math.sin(progress * Math.PI) * 0.8;
-                    mob.position.x += mob.userData.jumpTarget.x * 0.02;
-                    mob.position.z += mob.userData.jumpTarget.z * 0.02;
+                    const nextX = mob.position.x + mob.userData.jumpTarget.x * 0.02;
+                    const nextZ = mob.position.z + mob.userData.jumpTarget.z * 0.02;
+                    if(nextX*nextX + nextZ*nextZ < 49) {
+                        mob.position.x = nextX;
+                        mob.position.z = nextZ;
+                    } else {
+                        mob.userData.jumpTarget.multiplyScalar(-1);
+                    }
                 }
             } 
-            else if(mob.userData.type === 'slime') {
+            else if(type === 'slime') {
                 mob.userData.timer -= delta;
                 if(mob.userData.timer <= 0) {
-                    const angle = Math.random() * Math.PI * 2; 
+                    if(mob.userData.state === 'idle') {
+                        mob.userData.state = 'jump';
+                        mob.userData.timer = 0.8; 
+                        const angle = Math.random() * Math.PI * 2; 
+                        mob.userData.jumpTarget = new THREE.Vector3(Math.cos(angle)*2, 0, Math.sin(angle)*2);
+                        mob.rotation.y = Math.atan2(mob.userData.jumpTarget.x, mob.userData.jumpTarget.z);
+                    } else {
+                        mob.userData.state = 'idle';
+                        mob.userData.timer = 1 + Math.random();
+                        mob.position.y = mob.userData.baseY;
+                    }
+                }
+                
+                if(mob.userData.state === 'jump') {
+                    const progress = 1 - (mob.userData.timer / 0.8);
+                    mob.position.y = mob.userData.baseY + (4 * 1.5 * progress * (1 - progress));
                     const speed = 0.03;
-                    mob.userData.dir.set(Math.cos(angle)*speed, 0, Math.sin(angle)*speed);
-                    mob.userData.timer = 2 + Math.random();
+                    const nextX = mob.position.x + mob.userData.jumpTarget.x * speed;
+                    const nextZ = mob.position.z + mob.userData.jumpTarget.z * speed;
+                    if(nextX*nextX + nextZ*nextZ < 49) {
+                         mob.position.x = nextX;
+                         mob.position.z = nextZ;
+                    }
+                }
+            }
+            else if(type === 'hulk') {
+                mob.userData.timer -= delta;
+                if(mob.userData.timer <= 0) {
+                   const angle = Math.random() * Math.PI * 2;
+                   mob.userData.dir.set(Math.cos(angle)*0.02, 0, Math.sin(angle)*0.02);
+                   mob.rotation.y = Math.atan2(mob.userData.dir.x, mob.userData.dir.z);
+                   mob.userData.timer = 2 + Math.random();
                 }
                 const nextX = mob.position.x + mob.userData.dir.x;
                 const nextZ = mob.position.z + mob.userData.dir.z;
-                if(nextX*nextX + nextZ*nextZ < 49) mob.position.add(mob.userData.dir);
-                else mob.userData.dir.multiplyScalar(-1);
-                mob.position.y = mob.userData.baseY + Math.abs(Math.sin(time * 5)) * 0.3;
+                if(nextX*nextX + nextZ*nextZ < 40) {
+                    mob.position.add(mob.userData.dir);
+                    if(mob.userData.chain && Math.random() > 0.7) {
+                        const spark = createEmissiveVoxel(0xffaa00, 
+                            mob.position.x + (Math.random()-0.5), 
+                            0.5, 
+                            mob.position.z + (Math.random()-0.5), 
+                            biomes.lava, 
+                            {x:0.1, y:0.1, z:0.1}, 2
+                        );
+                        gsap.to(spark.position, {y:1.5, x:spark.position.x+(Math.random()-0.5), duration:0.5});
+                        gsap.to(spark.scale, {x:0, y:0, z:0, duration:0.5, onComplete:()=>biomes.lava.remove(spark)});
+                    }
+                } else {
+                    mob.userData.dir.multiplyScalar(-1);
+                    mob.rotation.y = Math.atan2(mob.userData.dir.x, mob.userData.dir.z);
+                }
+            }
+            else if(type === 'wizard') {
+                mob.userData.timer -= delta;
+                if(mob.userData.timer <= 0) {
+                    const angle = Math.random() * Math.PI * 2;
+                    mob.userData.dir.set(Math.cos(angle)*0.015, 0, Math.sin(angle)*0.015);
+                    mob.userData.timer = 2 + Math.random() * 3;
+                }
+                const nextX = mob.position.x + mob.userData.dir.x;
+                const nextZ = mob.position.z + mob.userData.dir.z;
+                const inCourtyard = (Math.abs(nextX) < 4 && nextZ > -1 && nextZ < 5);
+                if(inCourtyard) {
+                    mob.position.add(mob.userData.dir);
+                    mob.lookAt(mob.position.x + mob.userData.dir.x * 5, mob.position.y, mob.position.z + mob.userData.dir.z * 5);
+                } else {
+                    mob.userData.dir.multiplyScalar(-1); 
+                }
+                const bob = Math.sin(time * 2 + mob.userData.hoverOffset) * 0.2;
+                mob.position.y = mob.userData.baseY + bob;
+                if(mob.userData.book) {
+                    mob.userData.book.position.y = 1.1 + Math.sin(time * 3) * 0.05;
+                    mob.userData.book.rotation.y = Math.sin(time) * 0.1;
+                }
             }
         });
 
@@ -1150,23 +1226,19 @@
     }
     animate();
 
-    /* =========================================
-       INTERACTION & CAMERA
-       ========================================= */
     const VIEWS = {
         map: { pos: {x:0, y:50, z:70}, look: {x:0, y:0, z:0} },
-        forest: { pos: {x:-20, y:12, z:25}, look: {x:-20, y:0, z:10} },
-        lava: { pos: {x:20, y:12, z:25}, look: {x:20, y:-2, z:10} },
-        citadel: { pos: {x:0, y:20, z:5}, look: {x:0, y:12, z:-15} }, 
-        campfire: { pos: {x:0, y:5, z:15}, look: {x:0, y:0, z:5} },
-        battle: { pos: {x:0, y:10, z:40}, look: {x:0, y:0, z:0} } 
+        forest: { pos: {x:-20, y:20, z:35}, look: {x:-20, y:0, z:5} },
+        lava: { pos: {x:20, y:20, z:35}, look: {x:20, y:-2, z:5} },
+        citadel: { pos: {x:0, y:25, z:20}, look: {x:0, y:6, z:-15} }, 
+        campfire: { pos: {x:0, y:12, z:20}, look: {x:0, y:0, z:5} },
+        battle: { pos: {x:0, y:15, z:55}, look: {x:0, y:10, z:0} } 
     };
 
     function switchView(viewName) {
         state.view = viewName;
         const target = VIEWS[viewName];
         
-        // Reset world rotation when focusing
         gsap.to(worldGroup.rotation, {y: 0, duration: 1});
 
         gsap.to(camera.position, {
@@ -1182,7 +1254,6 @@
             onComplete: () => state.lastLook = target.look
         });
 
-        // UI State
         const isMap = viewName === 'map';
         document.getElementById('back-btn').style.display = isMap ? 'none' : 'block';
         document.getElementById('action-btn').style.display = isMap ? 'block' : 'none';
@@ -1196,23 +1267,23 @@
             scroll.classList.remove('minimized');
         }
 
-        // Special Scroll Logic for Campfire
         if(viewName === 'campfire') {
             scroll.classList.remove('minimized');
-            document.getElementById('scroll-title').innerText = "The Code";
+            document.getElementById('scroll-title').innerText = "Game Guide";
             document.getElementById('task-list').innerHTML = `
-                <div style="font-style:italic; padding:10px; text-align:center;">
-                    "Discipline is the bridge between goals and accomplishment.<br>
-                    Keep your promises to yourself.<br><br>
-                    Rest here, but do not linger forever."
+                <div style="padding:15px; font-size:14px; line-height:1.6; text-align:left;">
+                    <strong><i class="fas fa-exclamation-circle"></i> Instructions:</strong><br><br>
+                    1. <strong>Tasks = Ammunition:</strong> Completing tasks in the scroll grants you charges for the final battle.<br>
+                    2. <strong>More Tasks, Higher Chance:</strong> The more prepared you are, the higher your chance of defeating the Sky Kraken.<br>
+                    3. <strong>Zero Tolerance:</strong> Entering the battle with 0 tasks completed results in <span style="color:red; font-weight:bold;">IMMEDIATE DEFEAT</span> and map destruction.<br><br>
+                    Prepare wisely, traveler.
                 </div>
             `;
-            // Hide input
             document.querySelector('.scroll-body > div:last-child').style.display = 'none';
         } else {
             document.getElementById('scroll-title').innerText = "Captain's Log";
             document.querySelector('.scroll-body > div:last-child').style.display = 'block';
-            if(isMap) renderTasks(); // Restore task list
+            if(isMap) renderTasks(); 
         }
 
         if(!isMap && viewName !== 'battle') {
@@ -1222,7 +1293,6 @@
             label.style.fontFamily = data.font;
             label.style.color = data.titleColor;
             label.style.textShadow = `0 0 20px ${data.titleColor}`;
-            
             document.getElementById('biome-desc').innerText = data.desc;
             document.getElementById('biome-label').style.opacity = 1;
         } else {
@@ -1231,7 +1301,6 @@
     }
     
     window.addEventListener('mousemove', (e) => {
-        // Normalize mouse for Raycaster AND Parallax
         mouse.x = (e.clientX/window.innerWidth)*2-1;
         mouse.y = -(e.clientY/window.innerHeight)*2+1;
 
@@ -1259,7 +1328,6 @@
         }
     });
 
-    // Keyboard Support (ESC to go back)
     document.addEventListener('keydown', (e) => {
         if(e.key === "Escape" && state.view !== 'map' && !state.isBattling) {
             returnToMap();
@@ -1267,18 +1335,13 @@
     });
 
     function addHighlight(group) {
-        // Sound effect placeholder (Visual pop)
         gsap.to(group.position, { y: group.userData.baseY + 1.5, duration: 0.4, ease: "power2.out" });
         gsap.to(group.scale, { x: 1.05, z: 1.05, duration: 0.4 });
-        
-        // Intensity up cursor light
         gsap.to(cursorLight, { intensity: 2.5, distance: 30, duration: 0.2 });
     }
     function removeHighlight(group) {
         gsap.to(group.position, { y: group.userData.baseY, duration: 0.4, ease: "power2.out" });
         gsap.to(group.scale, { x: 1, z: 1, duration: 0.4 });
-        
-        // Dim light
         gsap.to(cursorLight, { intensity: 1.5, distance: 20, duration: 0.2 });
     }
 
@@ -1290,24 +1353,20 @@
     });
 
     window.returnToMap = () => {
-        // Reset scroll content if coming from campfire
         if(state.view === 'campfire') renderTasks();
         switchView('map');
     };
 
     /* =========================================
-       UI LOGIC (Tasks & Stats)
+       UI LOGIC
        ========================================= */
     function renderTasks() {
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         state.tasks.forEach((t, i) => {
-            // Find biome data based on stat type match
             const biomeEntry = Object.values(BIOME_DATA).find(b => b.stat === t.type);
             const colorNum = biomeEntry ? biomeEntry.color : 0x5c4a3b;
             const colorHex = '#' + colorNum.toString(16).padStart(6, '0');
-            
-            // Create RGBA for background
             const r = (colorNum >> 16) & 255;
             const g = (colorNum >> 8) & 255;
             const b = colorNum & 255;
@@ -1316,11 +1375,8 @@
 
             const div = document.createElement('div');
             div.className = `task-item ${t.completed?'completed':''}`;
-            
-            // Enhanced Styling
             div.style.borderLeft = `4px solid ${colorHex}`;
             div.style.background = `linear-gradient(to right, ${bgStart}, ${bgEnd})`;
-            
             let icon = 'fa-scroll';
             if(t.type === 'courage') icon = 'fa-tree';
             if(t.type === 'strength') icon = 'fa-fire';
@@ -1329,23 +1385,12 @@
 
             div.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="
-                        width: 24px; height: 24px; 
-                        background: ${colorHex}; 
-                        border-radius: 50%; 
-                        display: flex; align-items: center; justify-content: center;
-                        color: white; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                    ">
+                    <div style="width: 24px; height: 24px; background: ${colorHex}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                         <i class="fas ${icon}"></i>
                     </div>
                     <div style="font-weight:bold; color: var(--ink);">${t.text}</div>
                 </div>
-                <div style="
-                    font-family:'Homemade Apple'; 
-                    font-size:12px; 
-                    color: ${colorHex}; 
-                    font-weight: bold;
-                ">${t.completed ? 'Done' : 'Pending'}</div>
+                <div style="font-family:'Homemade Apple'; font-size:12px; color: ${colorHex}; font-weight: bold;">${t.completed ? 'Done' : 'Pending'}</div>
             `;
             div.onclick = () => toggleTask(i);
             list.appendChild(div);
@@ -1373,7 +1418,6 @@
         }
     };
     
-    // Add task on Enter key
     document.getElementById('task-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') addTask();
     });
@@ -1405,98 +1449,215 @@
     }
 
     /* =========================================
-       BATTLE SYSTEM (CINEMATIC)
+       BATTLE SYSTEM
        ========================================= */
+    function updateBattleUI() {
+        ['courage', 'strength', 'intellect'].forEach(type => {
+            const count = state.ammo[type];
+            const btn = document.getElementById(`btn-${type}`);
+            const span = document.getElementById(`ammo-${type}`);
+            span.innerText = `[${count}]`;
+            
+            if(count <= 0) {
+                btn.setAttribute('disabled', 'true');
+                btn.style.opacity = 0.5;
+                btn.style.cursor = 'not-allowed';
+            } else {
+                btn.removeAttribute('disabled');
+                btn.style.opacity = 1;
+                btn.style.cursor = 'pointer';
+            }
+        });
+    }
+
+    // --- DESTRUCTION SEQUENCE ---
+    function triggerWorldDestruction() {
+        // 1. Violent Camera Shake
+        gsap.to(camera.position, {
+            x: "+=2", y: "+=2", z: "+=2",
+            duration: 0.05, repeat: 30, yoyo: true
+        });
+
+        // 2. Mobs Fly Into Void
+        state.mobs.forEach(mob => {
+            gsap.to(mob.position, {
+                y: -150,
+                x: mob.position.x + (Math.random()-0.5)*50,
+                z: mob.position.z + (Math.random()-0.5)*50,
+                rotationX: Math.random()*10,
+                rotationZ: Math.random()*10,
+                duration: 3,
+                ease: "power2.in"
+            });
+        });
+
+        // 3. Shatter Biomes (Simulated)
+        // We iterate through biome groups and make random children fall
+        [biomes.forest, biomes.lava, biomes.citadel, biomes.campfire].forEach(group => {
+            shatterBiome(group);
+        });
+
+        // Boss looks triumphant
+        gsap.to(bossGroup.scale, {x:1.5, y:1.5, z:1.5, duration:0.5, yoyo:true, repeat:5});
+    }
+
+    function shatterBiome(group) {
+        group.children.forEach(child => {
+            if(Math.random() > 0.3) { // 70% of the map breaks
+                gsap.to(child.position, {
+                    y: -200,
+                    x: child.position.x + (Math.random()-0.5)*20,
+                    z: child.position.z + (Math.random()-0.5)*20,
+                    duration: 2 + Math.random()*3,
+                    ease: "power2.in",
+                    delay: Math.random()
+                });
+                gsap.to(child.rotation, {
+                    x: Math.random()*5,
+                    z: Math.random()*5,
+                    duration: 3
+                });
+            }
+        });
+    }
+
     window.initiateBattle = () => {
+        // CHECK: Any tasks completed?
+        const totalCompleted = state.tasks.filter(t => t.completed).length;
+        
         state.isBattling = true;
-        // 1. Curtains Close
+        
+        // Setup visuals
         document.getElementById('curtain-left').classList.add('closed');
         document.getElementById('curtain-right').classList.add('closed');
-        
-        // Hide UI
         document.getElementById('ui-layer').classList.add('hidden');
         document.getElementById('action-btn').style.display = 'none';
         document.getElementById('scroll-container').classList.add('minimized');
         document.getElementById('toggle-scroll-btn').style.display = 'none';
         document.body.classList.add('storm-mode');
 
-        // 2. Setup Scene Behind Curtains
+        if(totalCompleted === 0) {
+            // INSTANT DEFEAT PATH
+            setTimeout(() => {
+                switchView('battle');
+                bossGroup.visible = true;
+                document.getElementById('curtain-left').classList.remove('closed');
+                document.getElementById('curtain-right').classList.remove('closed');
+                
+                // Wait briefly then DESTROY
+                setTimeout(() => {
+                    triggerWorldDestruction();
+                    // Show Defeat Modal
+                    setTimeout(() => showModal(false, 0), 3000);
+                }, 1000);
+            }, 2200);
+            return;
+        }
+
+        // NORMAL BATTLE PATH
+        state.ammo.courage = state.tasks.filter(t => t.type === 'courage' && t.completed).length;
+        state.ammo.strength = state.tasks.filter(t => t.type === 'strength' && t.completed).length;
+        state.ammo.intellect = state.tasks.filter(t => t.type === 'intellect' && t.completed).length;
+        updateBattleUI();
+
         setTimeout(() => {
             switchView('battle');
             bossGroup.visible = true;
-            bossGroup.position.set(0, 0, 0);
-            bossGroup.scale.set(0.1, 0.1, 0.1);
-
-            // Environment Shift
             const stormColor = new THREE.Color(CONFIG.colors.stormBottom);
             scene.fog.color.copy(stormColor);
             hemiLight.intensity = 0.2;
-            cursorLight.intensity = 0; // Hide cursor light in battle
+            cursorLight.intensity = 0; 
             
-            // 3. Curtains Open
             document.getElementById('curtain-left').classList.remove('closed');
             document.getElementById('curtain-right').classList.remove('closed');
-            
-            // 4. Boss Reveal
-            gsap.to(bossGroup.scale, {x:1, y:1, z:1, duration: 2, ease: "back.out(1.7)"});
             
             const battleMsg = document.getElementById('battle-msg');
             const battleControls = document.getElementById('battle-controls');
             const battleUI = document.getElementById('battle-ui');
             
             battleUI.style.display = 'flex';
-            battleMsg.innerText = "The Void Stares Back...";
+            battleMsg.innerText = "The Sky Kraken Rises...";
             gsap.to(battleMsg, { opacity: 1, y: 0, duration: 1, delay: 1 });
             gsap.to(battleControls, { opacity: 1, y: 0, duration: 1, delay: 1.5 });
-
-        }, 1600); // Wait for curtain close
+        }, 2200); 
     };
 
-    window.performAttack = (type) => {
-        // Attack Animation
-        const battleMsg = document.getElementById('battle-msg');
-        battleMsg.innerText = `Channeling ${type.toUpperCase()}...`;
+    function fireProjectile(targetPos, color) {
+        const proj = createEmissiveVoxel(color, 
+            camera.position.x, camera.position.y - 2, camera.position.z - 2, 
+            scene, {x:0.5, y:0.5, z:0.5}, 5
+        );
         
-        // Camera Shake
-        gsap.to(camera.position, {x:"+=2", duration:0.05, yoyo:true, repeat:5});
-        
-        // Boss Flash
-        bossGroup.traverse(c => {
-             if(c.isMesh) {
-                c.userData.oldCol = c.material.color.getHex();
-                c.material.color.setHex(0xffffff);
+        gsap.to(proj.position, {
+            x: targetPos.x, y: targetPos.y + 4, z: targetPos.z, 
+            duration: 0.6, 
+            ease: "power1.in",
+            onComplete: () => {
+                scene.remove(proj);
+                const impact = createEmissiveVoxel(color, targetPos.x, targetPos.y+4, targetPos.z, scene, {x:3,y:3,z:3}, 10);
+                gsap.to(impact.scale, {x:6, y:6, z:6, duration:0.2, onComplete:()=>scene.remove(impact)});
+                gsap.to(impact.material, {opacity:0, duration:0.2});
+                
+                gsap.to(bossGroup.position, {z:"-=2", duration:0.1, yoyo:true, repeat:1});
+                bossGroup.children.forEach(c => {
+                    if(c.isGroup && c.children[0].material) {
+                        const old = c.children[0].material.color.getHex();
+                        c.children.forEach(m=>m.material.color.setHex(color));
+                        setTimeout(()=>c.children.forEach(m=>m.material.color.setHex(old)), 100);
+                    }
+                });
             }
         });
-        setTimeout(() => {
-            bossGroup.traverse(c => {
-                if(c.isMesh && c.userData.oldCol) c.material.color.setHex(c.userData.oldCol);
-            });
-        }, 100);
+    }
 
-        // Win Calculation
+    window.performAttack = (type) => {
+        if(state.ammo[type] <= 0) return;
+
+        state.ammo[type]--;
+        updateBattleUI();
+
+        const battleMsg = document.getElementById('battle-msg');
+        battleMsg.innerText = `Casting ${type.toUpperCase()}...`;
+        
+        gsap.to(camera.position, {y:"+=0.5", duration:0.1, yoyo:true, repeat:1});
+        
+        let col = 0xffffff;
+        if(type === 'courage') col = CONFIG.colors.forest;
+        if(type === 'strength') col = CONFIG.colors.lava;
+        if(type === 'intellect') col = CONFIG.colors.citadel;
+
+        fireProjectile(bossGroup.position, col);
+
+        const totalAmmo = state.ammo.courage + state.ammo.strength + state.ammo.intellect;
+        
+        if(totalAmmo <= 0) {
+            setTimeout(calculateResult, 1500);
+        }
+    };
+
+    function calculateResult() {
         const relevantTasks = state.tasks.filter(t => t.type !== 'campfire'); 
         const total = relevantTasks.length;
         const completed = relevantTasks.filter(t => t.completed).length;
         let pct = total > 0 ? completed / total : 0;
         
-        // Cap win chance at 95% to allow rare losses
-        const winChance = Math.min(pct, 0.95);
+        // --- SOFT GACHA LOGIC ---
+        // Base win chance reduced to 5% as requested.
+        const baseWinChance = 0.05; 
+        const winChance = baseWinChance + (pct * (1 - baseWinChance));
+
         const roll = Math.random();
         const victory = roll < winChance;
 
-        setTimeout(() => {
-            endBattle(victory, pct);
-        }, 1500);
-    };
-
-    function endBattle(victory, pct) {
         if(victory) {
             gsap.to(bossGroup.scale, { x:0, y:0, z:0, duration: 1, ease:"back.in" });
             setTimeout(() => showModal(true, pct), 1500);
         } else {
-            // Screen shakes violently
-            gsap.to(camera.position, {y:"-=5", duration: 0.5, ease:"bounce.out"});
-            setTimeout(() => showModal(false, pct), 1000);
+            // Defeat -> Destruction
+            triggerWorldDestruction();
+            document.body.style.backgroundColor = "#500000";
+            setTimeout(() => document.body.style.backgroundColor = "", 200);
+            setTimeout(() => showModal(false, pct), 3000);
         }
     }
     
@@ -1516,19 +1677,13 @@
             ];
             msg.innerText = messages[Math.floor(Math.random()*messages.length)];
         } else {
-            title.innerText = "Retreat";
-            if(pct >= 0.9) {
-                msg.innerText = "Even with perfect preparation, chaos sometimes wins. This is part of the path. Stand up.";
-            } else {
-                msg.innerText = "Your resolve was not enough. Complete more tasks and return.";
-            }
+            title.innerText = "Kingdom Fallen";
+            msg.innerText = "The Sky Kraken has shattered the realm. The void claims all.";
         }
     }
 
     window.closeModal = () => {
         document.getElementById('modal-overlay').style.display = 'none';
-        
-        // Reset Environment
         document.body.classList.remove('storm-mode');
         const skyColor = new THREE.Color(CONFIG.colors.skyBottom);
         gsap.to(scene.fog.color, { r: skyColor.r, g: skyColor.g, b: skyColor.b, duration: 2 });
@@ -1536,7 +1691,11 @@
         cursorLight.intensity = 1.5;
 
         bossGroup.visible = false;
+        bossGroup.scale.set(1,1,1); 
         
+        // RESET THE WORLD (Rebuild logic)
+        initWorld();
+
         state.isBattling = false;
         document.getElementById('ui-layer').classList.remove('hidden');
         document.getElementById('toggle-scroll-btn').style.display = 'flex';
